@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE struts PUBLIC
+        "-//Apache Software Foundation//DTD Struts Configuration 2.5//EN"
+        "http://struts.apache.org/dtds/struts-2.5.dtd">
+
+<!-- START SNIPPET: xworkSample -->
+<struts>
+        <package name="default" extends="struts-default">
+		        <result-types>
+					<result-type name="Bookjson" class="SearchBookResult"/>
+					<result-type name="message" class="MessageResult"></result-type>
+					<result-type name="deletedisbn" class="DeleteBookResult"></result-type>
+					<result-type name="addedresp" class="AddBookResult"></result-type>
+					<result-type name="updatedresp" class="UpdateBookResult"></result-type>
+				</result-types>
+				
+				<!-- 定义action -->
+                <action name="index">
+                        <result>/index.html</result>
+                </action>
+                
+                <!-- 返回搜索Book的结果 -->
+                <!--  测试url : booksearch?type=author-name&text=W.Richard Stevens -->
+                <action name="booksearch" class="BookSearchAction">
+                	<result type="Bookjson">
+                		<!-- no param for this -->
+                	</result>
+                	<result type="message" name="failed">
+                		Invalid Request Argument
+                	</result>
+                </action>
+                
+                <!-- 删除Book的结果 -->
+                <action name="bookdelete" class="BookDeleteAction">
+                	<result type="deletedisbn"></result>
+                </action>
+                
+                <!-- 添加Book的结果 -->
+                <action name="bookadd" class="BookAddAction">
+                	<result type="addedresp"></result>
+                </action>
+                
+                <!-- 更新Book的结果 -->
+                <action name="bookupdate" class="BookUpdateAction">
+                	<result type="updatedresp"></result>
+                </action>
+       
+        </package>
+</struts>

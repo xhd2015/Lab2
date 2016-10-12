@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset='utf-8'/>
+	<meta name="viewport" content="initial-scale=1.0, minimum-scale=1.0">
+    <title>Book Query System</title>
+
+    <style type="text/css">
+		
+		body{
+			background-color: white;
+			/*background-image: url(/WebDemo/images/background.jpg);*/
+			background-color: #CDC9C9;
+		}
+		
+		footer{
+			text-align:center;
+			font-color: red;
+		}
+		footer p{
+			font-color: red;
+		}
+		.showclick-minus , .showclick-plus{
+			cursor: pointer;
+		}
+		#searchres .prompt{
+			font-color: red;
+		}
+
+		/*定义bookname的style*/
+		#searchres .holder li .book_name{
+			font-size: 2em;
+		}
+		
+		
+    </style>
+    <!--'http://code.jquery.com-->
+    <script src='/WebDemo/jquery-3.1.0.min.js'></script>
+    <script>
+		//----**文档加载完成开始交互**-----
+		//我们必须明白有一些项对于一本图书来说并不是必须的
+		$(document).ready(function(){
+			var $col=$(".adding-column-example");
+			var $last=$col.parent().children().last();
+			
+			//设置input类和其显示的对应,为全局对象
+			mapping_class={
+			"---Select Input Type---" 	:"prompt",//后者是java属性名
+			"Book Name"					:"book_name",
+			"Author Name"				:"author_name",
+			"ISBN"						:"isbn",
+			"Price"						:"price",
+			"Publisher"					:"publisher",
+			"Publish Year"				:"publishyear",
+			"Author Age"				:"author_age",
+			"Author Country"			:"author_country",
+			"Author ID"					:"author_id"
+			};
+			
+			
+			//插件 : 设置一个输入框的参数,text默认值和type选择器的默认值
+			$.fn.setRowArgs=function(inputText,defType){
+				var $select=$(this).children().first().val(inputText).next();
+				$select.children().filter("[selected=selected]").removeAttr("selected");
+				$select.find('.'+defType).attr("selected","selected");
+				return $(this);
+			};
+			
+			//插件 : 获取输入的值和类型
+			$.fn.getRowArgs=function(){
+					return {"type":$(this).find(".input-type").children().filter("[selected=selected]").attr("class"),
+							"text":$(this).find(".input-text").val()
+					};
+			};
+			
+			//增加几项默认的参数,设置为必填项
+			$template=$col.clone();
+			$template.attr("class","adding-column").show(); //change class
+			$template.find(".showclick-minus").before($("<span>*</span>"));//make it necessary
+			$template.find(".showclick-minus").hide();//hide -
+			$template.find(".showclick-plus").hide(); //hide +
+			$template.setRowArgs("","book_name");
+			
+			
+			$last.before($template.clone().setRowArgs("","author_name")
+			);
+			$last.before($template.clone().setRowArgs("","isbn").find(".showclick-plus").show().parent()
+			);
+	
+			//模板最后设置参数
+			$col.after($template);
+			
+			//调试update模块
+			//$("#searchres").find(".example-modify").show();
+			
+		});
+    
+    </script>
+    <script src='/WebDemo/bookindex_format.js'></script>
+</head>
+<body>
+	<nav>
+	
+	</nav>
+	<header>
+			<label for="adding-book"></label>
+			<div id="adding-book" style="border:1px solid;">
+				<div class="adding-column-example" style="display:none">
+					<input type="text" class="input-text"/>
+					<select class="input-type">
+						<option class="prompt">---Select Input Type---</option>
+						<option class="book_name">Book Name</option>
+						<option class="author_name">Author Name</option>
+						<option class="isbn">ISBN</option>
+						<option class="price">Price</option>
+						<option class="publisher">Publisher</option>
+						<option class="publishyear">Publish Year</option>
+						<option class="author_age">Author Age</option>
+						<option class="author_id">Author ID</option>
+					</select> 
+					<img alt="-" class="showclick-minus" src="/WebDemo/images/icon-minus.png" style="font-size:2em; width:1%;height:1%;" onclick="removeColumn(this);"/>
+					<img alt="+" class="showclick-plus" src="/WebDemo/images/icon-plus.png" style="font-size:2em; width:1%;height:1%;" onclick="addColumn(this);"/>
+				</div>
+					
+				<input type="button" value="Add" onclick="getAddResult(this);"/>
+			</div>
+			<!--Search Box here-->
+			<div id="searching-book">
+				<input type="text" class="input-text"></input>
+				<select class="input-type">
+						<option class="prompt">---Select Input Type---</option>
+						<option class="book_name">Book Name</option>
+						<option class="author_name">Author Name</option>
+						<option class="isbn">ISBN</option>
+						<option class="publishyear">Publish Year</option>
+				</select>
+				<input type="button" onclick="getSearchResult(this);" value="Search"/>
+			</div>
+	</header>
+	
+	<hr/>
+	<!--Search content showed here-->
+	<section id="searchres">
+		<p class="prompt" style="display:none"></p>
+		<ul class="holder">
+			<!-- item format -->
+			<li class="example-show" authorid="-1" isbn="0" style="display:none">
+				<u class="book_name">Title</u> <small>by </small><span class="author_name">Author</span> $<span class="price">Price</span><br/> 
+				 <small>Published By </small><span class="publisher">Publisher</span> <small>In </small>
+				 <span class="publishyear">PublishYear</span> <span class="isbn">ISBN</span> 
+				 <button onclick="getDeleteResult(this);">Delete</button>&nbsp;&nbsp;<button onclick="changeToModify(this);">Modify</button> 
+			</li>
+			<li class="example-modify" style="display: none;">
+				<input type="text" value="Title" class="book_name"></input> <small>by </small><input type="text" value="Author" class="author_name"></input> <span>  $</span><input type="text" value="Price" class="price"></input> <br/> 
+				<small>Published By </small><input type="text" value="Publisher" class="publisher"></input> <small>In </small>
+				 <input type="text" value="PublishYear" class="publishyear"></input> <small>ISBN </small><input type="text" value="ISBN" class="isbn"></input>  <br/>
+				 <button onclick="changeToShow(this,true);">Confirm</button>&nbsp;&nbsp;<button onclick="changeToShow(this,false);">Cancle</button>
+			</li>
+		</ul>
+	</section>
+	<footer>
+		<p>&copy;Copyright 2016 Fulton Shaw</p>
+	</footer>
+</body>
+</html>
